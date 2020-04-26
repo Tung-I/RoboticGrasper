@@ -11,6 +11,7 @@ from unused_code.tm700_rgbdnormalized_Gym import tm700_rgbd_gym
 from bullet.tm700_rgbd_multiobject_Gym import tm700_rgbdmultiobj_gym
 from bullet.tm700_possensor_Gym import tm700_possensor_gym
 # from stable_baselines import DQN, DDPG
+from stable_baselines import DQN
 from baselines.helpers import evaluate
 import baselines.parser as parser
 import time
@@ -49,6 +50,8 @@ if MODEL == 'DQN':
 if MODEL == 'DDPG':
   model = DDPG.load(MODELNAME, env=env)
 
+# model = DQN.load(MODELNAME, env=env)
+
 
 ########## get baseline performance
 
@@ -78,7 +81,7 @@ def runsimulation(model, env, iterations):
 
 
 ########### EVALUATE MODEL
-print('##################')
+
 mean_episode_reward, successratio = evaluate(model, 100)
 print('Success rate', successratio, MODEL, ENVIRONMENT)
 
