@@ -8,17 +8,17 @@ import gym
 from bullet.tm700_rgbd_Gym import tm700_rgbd_gym
 from bullet.tm700_possensor_Gym import tm700_possensor_gym
 from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
-from stable_baselines import deepq
-from stable_baselines import DQN, PPO2, DDPG, HER
-from stable_baselines.her import GoalSelectionStrategy, HERGoalEnvWrapper
+# from stable_baselines import deepq
+# from stable_baselines import DQN, PPO2, DDPG, HER
+# from stable_baselines.her import GoalSelectionStrategy, HERGoalEnvWrapper
 import datetime
 # from stable_baselines_test.deepq.policies import MlpPolicy
-from stable_baselines.ddpg.policies import DDPGPolicy,MlpPolicy
+# from stable_baselines.ddpg.policies import DDPGPolicy,MlpPolicy
 import time
-from stable_baselines.common.vec_env import DummyVecEnv
+# from stable_baselines.common.vec_env import DummyVecEnv
 # from stable_baselines_test.common.policies import MlpPolicy
 import numpy as np
-from stable_baselines.common.vec_env import VecVideoRecorder
+# from stable_baselines.common.vec_env import VecVideoRecorder
 import imageio
 
 import os
