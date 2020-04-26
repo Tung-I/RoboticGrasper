@@ -12,7 +12,8 @@ from bullet.tm700_rgb_Gym import tm700_rgb_gym
 from bullet.tm700_possensor_Gym import tm700_possensor_gym
 import numpy as np
 
-from stable_baselines import DQN, DDPG
+# from stable_baselines import DQN, DDPG
+from stable_baselines import DQN
 from baselines.helpers import savemodel
 from datetime import date
 import time
@@ -169,7 +170,8 @@ def compose_callback(*callback_funcs): # takes a list of functions, and returns 
 
 ################ TRAINING
 
-model.learn(total_timesteps=time_steps, callback=auto_save_callback, seed=args.random_seed)
+# model.learn(total_timesteps=time_steps, callback=auto_save_callback, seed=args.random_seed)
+model.learn(total_timesteps=time_steps, callback=auto_save_callback)
 
 print('total time', time.time()-start)
 
