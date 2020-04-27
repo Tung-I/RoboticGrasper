@@ -151,11 +151,11 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     # urdfList = self._get_block()
     # self._objectUids = self._randomly_place_objects(urdfList)
     # urdfList = ['/home/tony/RoboticGrasper/baselines/obj_files/models/model_normalized.urdf']
-    urdfList = ['/home/tony/RoboticGrasper/baselines/obj_files/1/models/model_normalized.obj', 
-                '/home/tony/RoboticGrasper/baselines/obj_files/2/models/model_normalized.obj',
-                '/home/tony/RoboticGrasper/baselines/obj_files/3/models/model_normalized.obj',
-                '/home/tony/RoboticGrasper/baselines/obj_files/4/models/model_normalized.obj',
-                '/home/tony/RoboticGrasper/baselines/obj_files/5/models/model_normalized.obj'
+    urdfList = ['/home/tony/Desktop/obj_files/1/models/model_normalized.obj', 
+                '/home/tony/Desktop/obj_files/2/models/model_normalized.obj', 
+                '/home/tony/Desktop/obj_files/3/models/model_normalized.obj', 
+                '/home/tony/Desktop/obj_files/4/models/model_normalized.obj', 
+                '/home/tony/Desktop/obj_files/5/models/model_normalized.obj'
               ]
     # print('#########################')
     # print(urdfList)
@@ -203,9 +203,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
       # for _ in range(500):
       for _ in range(100):
         p.stepSimulation()
-    print('###########')
-    print(objectUids)
-    raise Exception('stop')
+
     return objectUids
 
   def _randomly_place_objects_2(self, urdfList):
