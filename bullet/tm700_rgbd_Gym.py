@@ -18,6 +18,7 @@ import gym
 from bullet.tm700 import tm700
 from unused_code.tm700_possensorbothgrippers_Gym import tm700_possensor_gym
 
+
 class tm700_rgbd_gym(tm700_possensor_gym):
   """Class for tm700 environment with diverse objects.
 
@@ -65,7 +66,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
 
     self._isDiscrete = isDiscrete
     # self._timeStep = 1. / 240.
-    self._timeStep = 1. / 120.
+    self._timeStep = 1. / 80.
     self._urdfRoot = urdfRoot
     self._actionRepeat = actionRepeat
     self._isEnableSelfCollision = isEnableSelfCollision
@@ -82,14 +83,18 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     self._removeHeightHack = removeHeightHack
     self._blockRandom = blockRandom
     self._cameraRandom = cameraRandom
-    self._width = width
-    self._height = height
+    # self._width = width
+    # self._height = height
+    self._width = 256
+    self._height = 256
     self._numObjects = numObjects
     self._isTest = isTest
     self.observation_space = spaces.Box(low=0,
                                          high=255,
                                          shape=(self._height, self._width, 3),
                                          dtype=np.uint8)
+    self.img_save_cnt = 0
+
 
     if self._renders:
       self.cid = p.connect(p.SHARED_MEMORY)
@@ -308,6 +313,9 @@ class tm700_rgbd_gym(tm700_possensor_gym):
 
     np_img_arr = np.reshape(rgb, (self._height, self._width, 4))
     np_img_arr = np_img_arr.astype(np.float64)
+
+    np.save('/home/tony/Desktop/step_save/img_'+str(self.img_save_cnt), np_img_arr)
+    self.img_save_cnt += 1
 
     test = np.concatenate([np_img_arr[:, :, 0:2], segmentation], axis=-1)
 
