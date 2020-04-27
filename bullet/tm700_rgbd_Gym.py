@@ -64,7 +64,8 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     """
 
     self._isDiscrete = isDiscrete
-    self._timeStep = 1. / 240.
+    # self._timeStep = 1. / 240.
+    self._timeStep = 1. / 120.
     self._urdfRoot = urdfRoot
     self._actionRepeat = actionRepeat
     self._isEnableSelfCollision = isEnableSelfCollision
@@ -146,10 +147,82 @@ class tm700_rgbd_gym(tm700_possensor_gym):
 
     # Choose the objects in the bin.
     # urdfList = self._get_random_object(self._numObjects, self._isTest)
-    urdfList = self._get_block()
-    self._objectUids = self._randomly_place_objects(urdfList)
+
+    # urdfList = self._get_block()
+    # self._objectUids = self._randomly_place_objects(urdfList)
+    # urdfList = ['/home/tony/RoboticGrasper/baselines/obj_files/models/model_normalized.urdf']
+    urdfList = ['/home/tony/RoboticGrasper/baselines/obj_files/1/models/model_normalized.obj', 
+                '/home/tony/RoboticGrasper/baselines/obj_files/2/models/model_normalized.obj',
+                '/home/tony/RoboticGrasper/baselines/obj_files/3/models/model_normalized.obj',
+                '/home/tony/RoboticGrasper/baselines/obj_files/4/models/model_normalized.obj',
+                '/home/tony/RoboticGrasper/baselines/obj_files/5/models/model_normalized.obj'
+              ]
+    # print('#########################')
+    # print(urdfList)
+    # raise Exception('stop')
+    self._objectUids = self._randomly_place_objects_3(urdfList)
+
+
+
+
     self._observation = self._get_observation()
     return np.array(self._observation)
+
+  def _randomly_place_objects_3(self, urdfList):
+    objectUids = []
+
+    shift = [0, -0.02, 0]
+    meshScale = [0.2, 0.2, 0.2]
+    #the visual shape and collision shape can be re-used by all createMultiBody instances (instancing)
+    for idx, urdf_path in enumerate(urdfList):
+      visualShapeId = p.createVisualShape(shapeType=p.GEOM_MESH,
+                                          fileName=urdf_path,
+                                          rgbaColor=[1, 1, 1, 1],
+                                          specularColor=[0.4, .4, 0],
+                                          visualFramePosition=shift,
+                                          meshScale=meshScale)
+      collisionShapeId = p.createCollisionShape(shapeType=p.GEOM_MESH,
+                                          fileName=urdf_path,
+                                          collisionFramePosition=shift,
+                                          meshScale=meshScale)
+      xpos = 0.2 + self._blockRandom * random.random() + 0.1*idx
+      ypos = self._blockRandom * (random.random() - .5)
+      uid = p.createMultiBody(baseMass=1,
+                      baseInertialFramePosition=[0, 0, 0],
+                      baseCollisionShapeIndex=collisionShapeId,
+                      baseVisualShapeIndex=visualShapeId,
+                      basePosition=[xpos, ypos, .15],
+                      useMaximalCoordinates=True)
+
+      # print('#########################')
+      # print(visualShapeId)
+      # print(collisionShapeId)
+      # raise Exception('stop')
+
+      objectUids.append(uid)
+      # for _ in range(500):
+      for _ in range(100):
+        p.stepSimulation()
+    print('###########')
+    print(objectUids)
+    raise Exception('stop')
+    return objectUids
+
+  def _randomly_place_objects_2(self, urdfList):
+    objectUids = []
+    for urdf_path in urdfList:
+      xpos = 0.4 + self._blockRandom * random.random()
+      ypos = self._blockRandom * (random.random() - .5)
+      angle = np.pi  #+ self._blockRandom * np.pi #* random.random()
+      orn = p.getQuaternionFromEuler([0, 0, angle])
+ 
+      uid = p.loadURDF(urdf_path, [xpos, ypos, .15], [orn[0], orn[1], orn[2], orn[3]])
+      objectUids.append(uid)
+      # Let each object fall to the tray individual, to prevent object
+      # intersection.
+      for _ in range(500):
+        p.stepSimulation()
+    return objectUids
 
   def _randomly_place_objects(self, urdfList):
     """Randomly places the objects in the bin.

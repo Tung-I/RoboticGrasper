@@ -49,6 +49,10 @@ if MODEL == 'DQN':
 if MODEL == 'DDPG':
   model = DDPG.load(MODELNAME, env=env)
 
+# print('#######################')
+# print(currentdir)
+# raise Exception('Stop!!!!!!!!!!')
+
 # model = DQN.load(MODELNAME, env=env)
 
 
