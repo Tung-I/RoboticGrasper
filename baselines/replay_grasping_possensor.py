@@ -29,7 +29,6 @@ RENDERS = args.renders
 MODELNAME = os.path.join(currentdir, args.logdir) #"./logdir_DQN_multi_11-02/best_model.zip"
 
 ################ MODEL AND GYM ENVIRONMENT
-
 if ENVIRONMENT == 'rgbd':
   env = tm700_rgbd_gym(renders=RENDERS, isDiscrete=DISCRETE)
 if ENVIRONMENT == 'multi':
@@ -81,6 +80,7 @@ def runsimulation(model, env, iterations):
 
 
 ########### EVALUATE MODEL
+# raise Exception('stop!!!!!!!!!')
 
 mean_episode_reward, successratio = evaluate(model, 100)
 print('Success rate', successratio, MODEL, ENVIRONMENT)

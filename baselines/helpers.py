@@ -142,6 +142,7 @@ class tm700Wrapper(gym.Wrapper):
         return obs, reward, done, info
 
 if __name__ == '__main__':
+    
 
     ################################## Filter tensorflow version warnings
     import os
