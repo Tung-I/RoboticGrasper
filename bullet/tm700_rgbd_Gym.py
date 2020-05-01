@@ -17,6 +17,7 @@ from pkg_resources import parse_version
 import gym
 from bullet.tm700 import tm700
 from unused_code.tm700_possensorbothgrippers_Gym import tm700_possensor_gym
+from pathlib import Path
 
 
 class tm700_rgbd_gym(tm700_possensor_gym):
@@ -66,7 +67,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
 
     self._isDiscrete = isDiscrete
     # self._timeStep = 1. / 240.
-    self._timeStep = 1. / 80.
+    self._timeStep = 1. / 60.
     self._urdfRoot = urdfRoot
     self._actionRepeat = actionRepeat
     self._isEnableSelfCollision = isEnableSelfCollision
@@ -85,8 +86,8 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     self._cameraRandom = cameraRandom
     # self._width = width
     # self._height = height
-    self._width = 256
-    self._height = 256
+    self._width = 128
+    self._height = 128
     self._numObjects = numObjects
     self._isTest = isTest
     self.observation_space = spaces.Box(low=0,
@@ -94,15 +95,18 @@ class tm700_rgbd_gym(tm700_possensor_gym):
                                          shape=(self._height, self._width, 3),
                                          dtype=np.uint8)
     self.img_save_cnt = 0
+    self.model_paths = self.get_data_path()
 
+    # if self._renders:
+    #   self.cid = p.connect(p.SHARED_MEMORY)
+    #   if (self.cid < 0):
+    #     self.cid = p.connect(p.GUI)
+    #   p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33]) # cameraposition of rendering
+    # else:
+    #   self.cid = p.connect(p.DIRECT)
 
-    if self._renders:
-      self.cid = p.connect(p.SHARED_MEMORY)
-      if (self.cid < 0):
-        self.cid = p.connect(p.GUI)
-      p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33]) # cameraposition of rendering
-    else:
-      self.cid = p.connect(p.DIRECT)
+    self.cid = p.connect(p.DIRECT)
+
     self.seed()
 
     if (self._isDiscrete):
@@ -116,15 +120,39 @@ class tm700_rgbd_gym(tm700_possensor_gym):
         self.action_space = spaces.Box(low=-1, high=1, shape=(4,))  # dx, dy, dz, da
     self.viewer = None
 
+
+  def get_data_path(self):
+    root = Path('/home/tony/datasets/ShapeNet_subset/')
+    class_paths = [c for c in root.iterdir() if c.is_dir() and 'ipynb' not in str(c)]
+    object_paths = []
+    for class_path in class_paths:
+        obj_paths = [o for o in class_path.iterdir() if o.is_dir()]
+        tmp = []
+        for o in obj_paths:
+            tmp.append(str(o / Path('models/model_normalized.obj')))
+        object_paths += tmp
+        
+    random.seed(7)
+    random.shuffle(object_paths)
+    return object_paths
+
+
   def reset(self):
     """Environment reset called at the beginning of an episode.
     """
     # Set the camera settings.
-    look = [0.1, -0.3, 0.54] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
-    distance = 0.5
+    # look = [0.1, -0.3, 0.54] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
+    look = [0.1, -0.3, 0.44] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
+    # distance = 0.5
+    distance = 0.8
+
     pitch = -45 + self._cameraRandom * np.random.uniform(-3, 3)
     yaw = -45 + self._cameraRandom * np.random.uniform(-3, 3)
     roll = 180
+    # pitch = -90
+    # yaw = -90
+    # roll = 180
+
     self._view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
     fov = 20. + self._cameraRandom * np.random.uniform(-2, 2)
     aspect = self._width / self._height
@@ -156,15 +184,16 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     # urdfList = self._get_block()
     # self._objectUids = self._randomly_place_objects(urdfList)
     # urdfList = ['/home/tony/RoboticGrasper/baselines/obj_files/models/model_normalized.urdf']
-    urdfList = ['/home/tony/Desktop/obj_files/1/models/model_normalized.obj', 
-                '/home/tony/Desktop/obj_files/2/models/model_normalized.obj', 
-                '/home/tony/Desktop/obj_files/3/models/model_normalized.obj', 
-                '/home/tony/Desktop/obj_files/4/models/model_normalized.obj', 
-                '/home/tony/Desktop/obj_files/5/models/model_normalized.obj'
-              ]
-    # print('#########################')
+    # urdfList = ['/home/tony/Desktop/obj_files/1/models/model_normalized.obj', 
+    #             '/home/tony/Desktop/obj_files/2/models/model_normalized.obj', 
+    #             '/home/tony/Desktop/obj_files/3/models/model_normalized.obj', 
+    #             '/home/tony/Desktop/obj_files/4/models/model_normalized.obj', 
+    #             '/home/tony/Desktop/obj_files/5/models/model_normalized.obj'
+    #           ]
+    # # print('#########################')
     # print(urdfList)
     # raise Exception('stop')
+    urdfList = self.model_paths[:3]
     self._objectUids = self._randomly_place_objects_3(urdfList)
 
 
@@ -314,8 +343,24 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     np_img_arr = np.reshape(rgb, (self._height, self._width, 4))
     np_img_arr = np_img_arr.astype(np.float64)
 
-    np.save('/home/tony/Desktop/step_save/img_'+str(self.img_save_cnt), np_img_arr)
+    print('######################')
+    print(p.getAABB(self._objectUids[0]))
+    # print(p.getBasePositionAndOrientation(self._objectUids[0]))
+    # print(self._view_matrix)
+    # print(self._proj_matrix)
+    view_mat = np.reshape(np.asarray(self._view_matrix), (4, 4))
+    proj_mat = np.reshape(np.asarray(self._proj_matrix), (4, 4))
+    pos = np.reshape(np.asarray(list(p.getBasePositionAndOrientation(self._objectUids[0])[0])+[1]), (4, 1))
+    AABB = np.reshape(np.asarray(p.getAABB(self._objectUids[0])), (2, 3))
+
+    np.save('/home/tony/Desktop/obj_save/pos_'+str(self.img_save_cnt), pos)
+    np.save('/home/tony/Desktop/obj_save/AABB_'+str(self.img_save_cnt), AABB)
+    np.save('/home/tony/Desktop/obj_save/view_mat_'+str(self.img_save_cnt), view_mat)
+    np.save('/home/tony/Desktop/obj_save/proj_mat_'+str(self.img_save_cnt), proj_mat)
+    np.save('/home/tony/Desktop/obj_save/img_'+str(self.img_save_cnt), np_img_arr)
     self.img_save_cnt += 1
+
+    raise Exception('stop')
 
     test = np.concatenate([np_img_arr[:, :, 0:2], segmentation], axis=-1)
 
