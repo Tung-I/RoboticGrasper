@@ -86,8 +86,10 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     self._cameraRandom = cameraRandom
     # self._width = width
     # self._height = height
+      # height and width of camera images
     self._width = 128
     self._height = 128
+
     self._numObjects = numObjects
     self._isTest = isTest
     self.observation_space = spaces.Box(low=0,
@@ -97,6 +99,10 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     self.img_save_cnt = 0
     self.model_paths = self.get_data_path()
 
+
+    # disable GUI or not
+    self.cid = p.connect(p.DIRECT)
+
     # if self._renders:
     #   self.cid = p.connect(p.SHARED_MEMORY)
     #   if (self.cid < 0):
@@ -105,7 +111,6 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     # else:
     #   self.cid = p.connect(p.DIRECT)
 
-    self.cid = p.connect(p.DIRECT)
 
     self.seed()
 
@@ -141,16 +146,16 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     """Environment reset called at the beginning of an episode.
     """
     # Set the camera settings.
-    # look = [0.1, -0.3, 0.54] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
-    look = [0.1, -0.3, 0.44] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
-    # distance = 0.5
+    look = [0.1, 0., 0.44]
     distance = 0.8
-
-    pitch = -45 + self._cameraRandom * np.random.uniform(-3, 3)
-    yaw = -45 + self._cameraRandom * np.random.uniform(-3, 3)
+    pitch = -90
+    yaw = -90
     roll = 180
-    # pitch = -90
-    # yaw = -90
+
+    # look = [0.1, -0.3, 0.54] #[0.4317558029454219, 0.1470448842904527, 0.2876218894185256]#[0.23, 0.2, 0.54] # from where the input is
+    # distance = 0.5
+    # pitch = -45 + self._cameraRandom * np.random.uniform(-3, 3)
+    # yaw = -45 + self._cameraRandom * np.random.uniform(-3, 3)
     # roll = 180
 
     self._view_matrix = p.computeViewMatrixFromYawPitchRoll(look, distance, yaw, pitch, roll, 2)
@@ -173,7 +178,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
                                0.000000, 0.000000, 0.0, 1.0)
 
     p.setGravity(0, 0, -10)
-    self._tm700 = tm700(urdfRootPath=self._urdfRoot, timeStep=self._timeStep)
+    # self._tm700 = tm700(urdfRootPath=self._urdfRoot, timeStep=self._timeStep)
 
     self._envStepCounter = 0
     p.stepSimulation()
@@ -193,7 +198,7 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     # # print('#########################')
     # print(urdfList)
     # raise Exception('stop')
-    urdfList = self.model_paths[:3]
+    urdfList = self.model_paths[:1]
     self._objectUids = self._randomly_place_objects_3(urdfList)
 
 
@@ -344,20 +349,21 @@ class tm700_rgbd_gym(tm700_possensor_gym):
     np_img_arr = np_img_arr.astype(np.float64)
 
     print('######################')
-    print(p.getAABB(self._objectUids[0]))
+    # print(p.getAABB(self._objectUids[0]))
     # print(p.getBasePositionAndOrientation(self._objectUids[0]))
     # print(self._view_matrix)
     # print(self._proj_matrix)
     view_mat = np.reshape(np.asarray(self._view_matrix), (4, 4))
     proj_mat = np.reshape(np.asarray(self._proj_matrix), (4, 4))
-    pos = np.reshape(np.asarray(list(p.getBasePositionAndOrientation(self._objectUids[0])[0])+[1]), (4, 1))
+    # pos = np.reshape(np.asarray(list(p.getBasePositionAndOrientation(self._objectUids[0])[0])+[1]), (4, 1))
+    pos = np.asarray(p.getBasePositionAndOrientation(self._objectUids[0])[0])
     AABB = np.reshape(np.asarray(p.getAABB(self._objectUids[0])), (2, 3))
 
     np.save('/home/tony/Desktop/obj_save/pos_'+str(self.img_save_cnt), pos)
     np.save('/home/tony/Desktop/obj_save/AABB_'+str(self.img_save_cnt), AABB)
     np.save('/home/tony/Desktop/obj_save/view_mat_'+str(self.img_save_cnt), view_mat)
     np.save('/home/tony/Desktop/obj_save/proj_mat_'+str(self.img_save_cnt), proj_mat)
-    np.save('/home/tony/Desktop/obj_save/img_'+str(self.img_save_cnt), np_img_arr)
+    np.save('/home/tony/Desktop/obj_save/img_'+str(self.img_save_cnt), np_img_arr / 255.)
     self.img_save_cnt += 1
 
     raise Exception('stop')
