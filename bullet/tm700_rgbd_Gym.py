@@ -33,6 +33,7 @@ UNSEEN = ['rocket', 'lamp', 'pistol', 'car']  # 21855, 6243
 RESUME_NUM = 2640
 TASK_SEEN = False
 TASK_UNSEEN = True
+USE_GUI = True
 
 class tm700_rgbd_gym(tm700_possensor_gym):
     def __init__(self,
@@ -87,7 +88,13 @@ class tm700_rgbd_gym(tm700_possensor_gym):
         self.model_paths, self.unseen_model_paths = self.get_data_path()
         #############################
         # disable GUI or not
-        self.cid = p.connect(p.DIRECT)
+        if USE_GUI:
+            self.cid = p.connect(p.SHARED_MEMORY)
+            if (self.cid < 0):
+                self.cid = p.connect(p.GUI)
+            p.resetDebugVisualizerCamera(1.3, 180, -41, [0.52, -0.2, -0.33]) # cameraposition of rendering
+        else:
+            self.cid = p.connect(p.DIRECT)
 
         self.seed()
 
