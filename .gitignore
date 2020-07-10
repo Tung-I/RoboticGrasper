@@ -1,2 +1,4 @@
 logdir_*
 logdir_segmentation_DQN_rgbd_27-04/*
+data/*
+# output/*
